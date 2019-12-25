@@ -1,6 +1,5 @@
 // based on d3-drag implementation: https://github.com/d3/d3-drag
 export default function drag(node, options) {
-  const container = node.ownerSVGElement;
   const moveDistance = 7;
 
   let initialX;
@@ -30,7 +29,7 @@ export default function drag(node, options) {
         once: true,
         capture: true
       });
-    const rect = container.getBoundingClientRect();
+    const rect = node.ownerSVGElement.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
