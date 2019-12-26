@@ -19,6 +19,14 @@
 
   $: selectedNode = selectedItem && nodes.find(node => node.id === selectedItem.name);
 
+  function resetSimulation() {
+    simulation.alphaTarget(0.3).restart();
+  }
+
+  function resumeSimulation() {
+    simulation.alphaTarget(0);
+  }
+
   function updateSimulation() {
     if (simulation) {
       simulation.stop();
