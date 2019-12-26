@@ -10,3 +10,10 @@ export function findTransitiveDeps(item, data, list = []) {
   });
   return list;
 }
+
+export function arrayDifference(newArray, oldArray, trackBy) {
+  return newArray.filter(item1 => {
+    const key = trackBy(item1);
+    return !oldArray.find(item2 => trackBy(item2) === key);
+  });
+}

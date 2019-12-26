@@ -1,9 +1,9 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-  import differenceBy from 'lodash-es/differenceBy';
   import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
 
   import forceBorders from './utils/force-borders.js';
+  import { arrayDifference } from './utils/data.js';
   import GraphNode from './GraphNode.svelte';
 
   export let data;
@@ -29,8 +29,8 @@
 
   function diffElements(newArray, oldArray) {
     const diffFn = item => item.id;
-    const added = differenceBy(newArray, oldArray, diffFn);
-    const removedIds = differenceBy(oldArray, newArray, diffFn).map(item => item.id);
+    const added = arrayDifference(newArray, oldArray, diffFn);
+    const removedIds = arrayDifference(oldArray, newArray, diffFn).map(item => item.id);
 
     return oldArray.concat(added).filter(item => !removedIds.includes(item.id));
   }
