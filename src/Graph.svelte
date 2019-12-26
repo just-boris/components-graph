@@ -2,8 +2,8 @@
   import { onMount, onDestroy } from 'svelte';
   import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
 
-  import dragBehavior from './utils/drag.js';
   import forceBorders from './utils/force-borders.js';
+  import GraphNode from './GraphNode.svelte';
 
   export let data;
   export let selectedItem;
@@ -57,25 +57,6 @@
     }
   });
 
-  function getDragOptions(node) {
-    return {
-      start() {
-        simulation.alphaTarget(0.3).restart();
-        node.fx = node.x;
-        node.fy = node.y;
-      },
-      move({ x, y }) {
-        node.fx = x;
-        node.fy = y;
-      },
-      end() {
-        simulation.alphaTarget(0);
-        node.fx = null;
-        node.fy = null;
-      }
-    };
-  }
-
   function handleSelection(node) {
     if (selectedNode === node) {
       onSelect(null);
@@ -89,23 +70,6 @@
   svg {
     width: 100%;
     height: 100vh;
-  }
-
-  .chart-node {
-    fill: #687078;
-    /*stroke: #aab7b8;*/
-  }
-
-  .chart-node-complex {
-    fill: #ec7211;
-  }
-
-  .chart-node-selected {
-    fill: #0073bb;
-  }
-
-  .chart-node-transitive {
-    fill: #00a1c9;
   }
 
   .chart-link {
@@ -155,16 +119,13 @@
   </g>
   <g>
     {#each nodes as node}
-      <circle
-        on:click={() => handleSelection(node)}
-        use:dragBehavior={getDragOptions(node)}
-        class="chart-node"
-        class:chart-node-complex={node.deps.length > 0}
-        class:chart-node-selected={selectedNode === node}
-        class:chart-node-transitive={selectedTransitive.includes(node.id)}
-        r="7"
-        cx={node.x}
-        cy={node.y} />
+      <GraphNode
+        {node}
+        isSelected={node === selectedNode}
+        isTransitive={selectedTransitive.includes(node.id)}
+        onSelect={() => handleSelection(node)}
+        onDragStart={resetSimulation}
+        onDragEnd={resumeSimulation} />
     {/each}
   </g>
   <g>
