@@ -1,4 +1,5 @@
 <script>
+  import { fade } from 'svelte/transition';
   import { findTransitiveDeps } from './utils/data.js';
 
   export let data;
@@ -31,7 +32,7 @@
     <th width="40px">Transitive deps</th>
   </tr>
   {#each data as item}
-    <tr>
+    <tr transition:fade>
       <td>{item.name}</td>
       <td class="number-cell">{item.deps.length}</td>
       <td class="number-cell">{findTransitiveDeps(item, data).length}</td>

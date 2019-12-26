@@ -1,11 +1,13 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import differenceBy from 'lodash-es/differenceBy';
   import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
 
   import forceBorders from './utils/force-borders.js';
   import GraphNode from './GraphNode.svelte';
 
   export let data;
+  let previousData;
   export let selectedItem;
   export let selectedTransitive;
   export let onSelect;
@@ -13,9 +15,38 @@
   let svg;
   let simulation;
   let selectedNode;
+  let links = [];
+  let nodes = [];
 
-  let links = data.flatMap(d => d.deps.map(dep => ({ source: d.name, target: dep })));
-  let nodes = data.map(d => ({ id: d.name, deps: d.deps }));
+  function buildLinks(data) {
+    return data.flatMap(d => d.deps.map(dep => ({ id: `${d.name}-${dep}`, source: d.name, target: dep })));
+  }
+
+  function buildNodes(data) {
+    const { width, height } = svg.getBoundingClientRect();
+    return data.map(d => ({ id: d.name, deps: d.deps, x: width / 2, y: height / 2 }));
+  }
+
+  function diffElements(newArray, oldArray) {
+    const diffFn = item => item.id;
+    const added = differenceBy(newArray, oldArray, diffFn);
+    const removedIds = differenceBy(oldArray, newArray, diffFn).map(item => item.id);
+
+    return oldArray.concat(added).filter(item => !removedIds.includes(item.id));
+  }
+
+  $: {
+    if (svg && data !== previousData) {
+      nodes = diffElements(buildNodes(data), nodes);
+      links = diffElements(buildLinks(data), links);
+      if (simulation) {
+        simulation.nodes(nodes);
+        simulation.force('link').links(links);
+        resetSimulation();
+      }
+      previousData = data;
+    }
+  }
 
   $: selectedNode = selectedItem && nodes.find(node => node.id === selectedItem.name);
 
@@ -56,6 +87,8 @@
   }
 
   onMount(() => {
+    links = buildLinks(data);
+    nodes = buildNodes(data);
     updateSimulation();
   });
 
